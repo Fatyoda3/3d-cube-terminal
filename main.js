@@ -1,42 +1,55 @@
-import { Cube } from "./src/shape.js";
-import { draw, getPoints, makeScreen, plotPoint } from "./src/utilities.js";
-const [X, Y, Z] = [0, 1, 2];
+import { drawShapes, toRadian } from "./src/utilities.js";
+import { canvas, createCanvas } from "./src/config.js";
+import { Cuboid } from "./src/shape.js";
 
-const getProjection = (p, screenZ = 10) => {
-  const pX = screenZ * p[X] / p[Z];
-  const pY = screenZ * p[Y] / p[Z];
-  return { pX, pY };
+const SHAPES = [];
+const [X, Y] = [0, 1];
+
+const setup = () => {
+  console.clear();
+  createCanvas(canvas);
+  const offsets = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 0]];
+  const params = [200, 100, 100, 100];
+
+  for (const offset of offsets) {
+    const cube = new Cuboid(200 * offset[X], 200 * offset[Y], ...params);
+    SHAPES.push(cube);
+  }
 };
 
-const screen = makeScreen(50, 50);
+const draw = () => {
+  drawShapes(SHAPES);
+};
 
-const cube = new Cube(40, 10, 50, 10, 10, 10);
-
-const projectedPoints = cube.faces.map((face) =>
-  face.map((vertices) => getProjection(vertices))
-);
-
-projectedPoints.forEach((face) => {
-  face.forEach((point) => plotPoint(point.pY, point.pX, screen, "XX"));
-});
-for (const face of projectedPoints) {
-  const first = face.at(0);
-  for (let i = 1; i < face.length; i += 1) {
-    const p1 = face[i - 1];
-    const p2 = face[i];
-    const points = getPoints(p1, p2);
-
-    points.forEach((point) => {
-      plotPoint(point.y, point.x, screen, "--");
-    });
-  }
-
-  const last = face.at(-1);
-  const points = getPoints(last, first);
-
-  points.forEach((point) => {
-    plotPoint(point.y, point.x, screen, "--");
+const delay = async (time) => {
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(1);
+    }, time);
   });
-}
+};
 
-draw(screen, false);
+const animateLoop = async () => {
+  const unitRadian = toRadian(1);
+
+  while (true) {
+    createCanvas(canvas);
+
+    SHAPES.forEach((shape) =>
+      shape.changeRotation(unitRadian, unitRadian, unitRadian)
+    );
+
+    draw();
+
+    console.log(canvas.pixels.map((row) => row.join("")).join("\n"));
+
+    await delay(100);
+  }
+};
+
+
+const main = () => {
+  setup();
+  animateLoop();
+};
+main();
