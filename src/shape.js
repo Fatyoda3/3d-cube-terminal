@@ -106,3 +106,81 @@ export class Cuboid {
     return this.getWorldPoints(translated);
   }
 }
+
+export class Sphere {
+  constructor(r = 50, x = 0, y = 0, z = 0) {
+    this.centre = createVector(x, y, z);
+    this.r = r;
+    this.vertices = this.createVertices();
+    this.translation = createVector();
+    this.rotation = createVector();
+  }
+
+  createVertices(steps = 8) {
+    const increment = Math.PI / steps;
+    const vertices = [];
+
+    for (let phi = 0; phi <= Math.PI; phi += increment) {
+      for (let theta = 0; theta < Math.PI * 2; theta += increment) {
+        const sine = this.r * Math.sin(phi);
+        const x = sine * Math.cos(theta);
+        const y = sine * Math.sin(theta);
+        const z = this.r * Math.cos(phi);
+        vertices.push(createVector(x, y, z));
+      }
+    }
+    return vertices;
+  }
+
+  increaseTranslation(delta = { x: 1 }) {
+    this.translation.add(delta);
+  }
+  increaseRotation(delta = { x: 1 }) {
+    this.rotation.add(delta);
+  }
+
+  rotateVertex(vertex, rotation) {
+    const radX = toRadian(rotation.x);
+    const radY = toRadian(rotation.y);
+    const radZ = toRadian(rotation.z);
+    // ===============rotate in X ============//
+
+    const cosX = Math.cos(radX);
+    const sinX = Math.sin(radX);
+    const y1 = cosX * vertex.y - sinX * vertex.z;
+    const z1 = sinX * vertex.y + cosX * vertex.z;
+
+    // ===============rotate in Y ============//
+    const cosY = Math.cos(radY);
+    const sinY = Math.sin(radY);
+    const x1 = cosY * vertex.x + sinY * z1;
+    const z2 = -sinY * vertex.x + cosY * z1;
+
+    // ===============rotate in Z ============//
+    const cosZ = Math.cos(radZ);
+    const sinZ = Math.sin(radZ);
+    const x2 = cosZ * x1 - sinZ * y1;
+    const y2 = sinZ * x1 + cosZ * y1;
+
+    return createVector(x2, y2, z2);
+  }
+
+  rotateVertices() {
+    return this.vertices.map((vertex) => {
+      const rotatedVertex = this.rotateVertex(vertex, this.rotation);
+
+      return rotatedVertex;
+    });
+  }
+
+  getWorldPoints() {
+    const rotated = this.rotateVertices();
+    return rotated
+      .map((
+        { x, y, z },
+      ) => [createVector(x, y, z).add(this.centre).add(this.translation)]);
+  }
+  printableFaces() {
+    return this.getWorldPoints();
+  }
+}

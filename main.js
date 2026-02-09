@@ -1,6 +1,6 @@
 import { plotShapes } from "./src/utilities.js";
 import { canvas, createCanvas } from "./src/config.js";
-import { Cuboid } from "./src/shape.js";
+import { Cuboid, Sphere } from "./src/shape.js";
 import { cls, draw } from "./src/cls.js";
 import { delay } from "./src/delay.js";
 let mode = true;
@@ -61,7 +61,8 @@ const handleKeystrokes = async (keystrokeBuff) => {
 createCanvas(canvas);
 
 const cube = new Cuboid(-100, 0, 200, 75, 75, 75);
-const shapes = [cube];
+const sphere = new Sphere(200, -300, -100, 600);
+const shapes = [sphere, cube];
 
 const renderLoop = async () => {
   const keystrokeBuff = new Uint8Array(1);
@@ -74,6 +75,8 @@ const renderLoop = async () => {
 
     cube.increaseRotation(incRotation);
     cube.increaseTranslation(incTranslate);
+
+    sphere.increaseTranslation(incTranslate);
 
     if (mode) {
       incTranslate.x = 0;

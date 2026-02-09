@@ -29,6 +29,7 @@ const getProjection = (p, screenZ = 30) => {
 const drawVertexLine = (vertices, index) => {
   const p1 = getProjection(vertices[index]);
   const p2 = getProjection(vertices.at(index - 1));
+
   p1.add(offsetCentre);
   p2.add(offsetCentre);
   drawLine(p1, p2, canvas);
@@ -41,7 +42,9 @@ const drawWireFrame = (vertices) => {
 
 export const plotShape = (shape) =>
   shape.printableFaces().forEach(drawWireFrame);
+
 export const plotShapes = (shapes) => shapes.forEach(plotShape);
+
 export const isInRange = (min, value, max) => min < value && value < max;
 
 export const plotPoint = (y, x, screen, icon = "  ") => {
