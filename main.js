@@ -5,8 +5,8 @@ import { cls, draw } from "./src/cls.js";
 import { delay } from "./src/delay.js";
 let mode = true;
 
-const incRotation = { x: 0, y: 0 };
-const incTranslate = { x: 0, y: 0 };
+const incRotation = { x: 0, y: 0, z: 0 };
+const incTranslate = { x: 0, y: 0, z: 0 };
 
 const KEYS = {
   w: 119,
@@ -18,6 +18,12 @@ const KEYS = {
   k: 107,
   l: 108,
   b: 98,
+  "0": 48,
+  "9": 57,
+  "-": 45,
+  "=": 61,
+  q: 113,
+  e: 101,
 };
 
 Deno.stdin.setRaw(true, { cbreak: true });
@@ -29,11 +35,14 @@ const handleKeystrokes = async (keystrokeBuff) => {
     //y -->
     if (KEYS.b === pressed) mode = !mode;
 
-    if (KEYS.w === pressed) incTranslate.y -= 5;
-    if (KEYS.s === pressed) incTranslate.y += 5;
+    if (KEYS.w === pressed) incTranslate.x -= 5;
+    if (KEYS.s === pressed) incTranslate.x += 5;
     // x -->
-    if (KEYS.d === pressed) incTranslate.x += 5;
-    if (KEYS.a === pressed) incTranslate.x -= 5;
+    if (KEYS.d === pressed) incTranslate.y += 5;
+    if (KEYS.a === pressed) incTranslate.y -= 5;
+
+    if (KEYS.q === pressed) incTranslate.z += 5;
+    if (KEYS.e === pressed) incTranslate.z -= 5;
 
     //y -->
     if (KEYS.j === pressed) incRotation.x -= 5;
@@ -41,6 +50,9 @@ const handleKeystrokes = async (keystrokeBuff) => {
     // x -->
     if (KEYS.i === pressed) incRotation.y += 5;
     if (KEYS.k === pressed) incRotation.y -= 5;
+    //z
+    if (KEYS["0"] === pressed) incRotation.z += 5;
+    if (KEYS["9"] === pressed) incRotation.z -= 5;
 
     if (pressed === 3) return true; // Ctrl+C
   }
@@ -48,7 +60,7 @@ const handleKeystrokes = async (keystrokeBuff) => {
 
 createCanvas(canvas);
 
-const cube = new Cuboid(0, 0, 300, 100, 100, 100);
+const cube = new Cuboid(-100, 0, 200, 75, 75, 75);
 const shapes = [cube];
 
 const renderLoop = async () => {
@@ -60,24 +72,17 @@ const renderLoop = async () => {
     handleKeystrokes(keystrokeBuff);
     console.log({ incRotation, incTranslate, mode });
 
-    cube.increaseRotation({
-      x: incRotation.x,
-      y: incRotation.y,
-      z: 0,
-    });
-
-    cube.increaseTranslation({
-      x: incTranslate.y,
-      y: incTranslate.x,
-      z: 0,
-    });
+    cube.increaseRotation(incRotation);
+    cube.increaseTranslation(incTranslate);
 
     if (mode) {
       incTranslate.x = 0;
       incTranslate.y = 0;
+      incTranslate.z = 0;
 
       incRotation.x = 0;
       incRotation.y = 0;
+      incRotation.z = 0;
     }
 
     plotShapes(shapes);

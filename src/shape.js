@@ -50,20 +50,12 @@ export class Cuboid {
     this.translation.add(delta);
   }
 
-  rotateOnAxis(vertex, axis1, axis2, angle = 0) {
-    const rad = toRadian(angle);
-    const c = Math.cos(rad);
-    const s = Math.sin(rad);
-    const dAxis1 = vertex[axis1] * c - vertex[axis2] * s;
-    const dAxis2 = vertex[axis2] * c + vertex[axis1] * s;
-    return [dAxis1, dAxis2];
-  }
-
   rotateVertex(vertex, rotation) {
     const radX = toRadian(rotation.x);
     const radY = toRadian(rotation.y);
     const radZ = toRadian(rotation.z);
     // ===============rotate in X ============//
+
     const cosX = Math.cos(radX);
     const sinX = Math.sin(radX);
     const y1 = cosX * vertex.y - sinX * vertex.z;
