@@ -66,7 +66,7 @@ export const drawLine = (p1, p2, canvas) => {
   let y = p2.y;
 
   for (let inc = 0; inc <= steps; inc++) {
-    plotPoint(y, x, canvas, "💋");
+    plotPoint(y, x, canvas, "✅");
     // canvas.pixels[Math.round(y)][Math.round(x)] = "XX";
     x += stepsInX;
     y += stepsInY;

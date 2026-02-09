@@ -45,6 +45,7 @@ export class Cuboid {
   increaseRotation(delta = { x: 1 }) {
     this.rotation.add(delta);
   }
+
   increaseTranslation(delta = { x: 1 }) {
     this.translation.add(delta);
   }
@@ -96,16 +97,15 @@ export class Cuboid {
     return faces.map((face) => {
       return face.map(({ x, y, z }) =>
         createVector(x, y, z)
-          // .add(this.centre)
           .add(this.translation)
       );
     });
   }
 
   getWorldPoints(rotated = this.faces) {
-    return rotated.map((face) => {
-      return face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre));
-    });
+    return rotated.map((face) =>
+      face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre))
+    );
   }
 
   printableFaces() {
