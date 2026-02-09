@@ -1,20 +1,22 @@
 import { createVector } from "./utilities.js";
+const UNIT_RAD = Math.PI / 180;
+export const toRadian = (d) => d * UNIT_RAD;
+
 export class Cuboid {
-  constructor(x, y, z, h, w, d) {
+  constructor(x, y, z, w, h, d) {
     this.centre = createVector(x, y, z);
-    this.h = h;
     this.w = w;
+    this.h = h;
     this.d = d;
-
     this.vertices = this.createVertices();
-    this.faces = this.createFaces(this.vertices);
-
-    this.rotations = createVector(0, 0, 0);
+    this.faces = this.createFaces();
+    this.rotation = createVector();
   }
 
   createVertices() {
     // {FRONT/BACK}<->{LEFT/RIGHT}<->{TOP/BOTTOM}
     const [w2, h2, d2] = [this.w / 2, this.h / 2, this.d / 2];
+
     const p1 = createVector(-w2, -h2, -d2); //(F-L-T)
     const p2 = createVector(-w2, +h2, -d2); //(F-L-B)
     const p3 = createVector(+w2, +h2, -d2); //(F-R-B)
@@ -26,8 +28,8 @@ export class Cuboid {
     return [p1, p2, p3, p4, p5, p6, p7, p8];
   }
 
-  createFaces(vertices = this.vertices) {
-    const [p1, p2, p3, p4, p5, p6, p7, p8] = vertices;
+  createFaces() {
+    const [p1, p2, p3, p4, p5, p6, p7, p8] = this.vertices;
 
     const f1 = [p1, p2, p3, p4]; // FRONT
     const f2 = [p5, p6, p7, p8]; // BACK
@@ -39,84 +41,61 @@ export class Cuboid {
     return [f1, f2, f3, f4, f5, f6];
   }
 
-  changeRotation(x = 0, y = 0, z = 0) {
-    this.rotations.add(createVector(x, y, z));
-  }
-
-  rotateInAxis(point, angle, fromAxis = "x", toAxis = "y") {
-    const c = Math.cos(angle);
-    const s = Math.sin(angle);
-
-    const fromAxisPoint = point[fromAxis] * c - point[toAxis] * s;
-    const toAxisPoint = point[fromAxis] * s + point[toAxis] * c;
-
-    return [fromAxisPoint, toAxisPoint];
-  }
-
-  angleBetween(p1, p2, dA, axis1 = "x", axis2 = "z") {
-    const dAxis1 = p1[axis1] - p2[axis1];
-    const dAxis2 = p1[axis2] - p2[axis2];
-
-    const angle = Math.atan2(dAxis2, dAxis1) + dA;
-    const radius = Math.sqrt((dAxis1 ** 2) + (dAxis2 ** 2));
-
-    const delAxis1 = Math.sin(angle) * radius + p2[axis2];
-    const delAxis2 = Math.cos(angle) * radius + p2[axis1];
-
-    return [delAxis2, delAxis1];
-  }
-
-  rotateVerticesAtOneAxis(points, reference) {
-    points.forEach((point) => {
-      let [v1, v2] = this.angleBetween(
-        point,
-        reference,
-        this.rotations.z,
-        "x",
-        "y",
-      );
-      point["x"] = v1;
-      point["y"] = v2;
-      [v1, v2] = this.angleBetween(
-        point,
-        reference,
-        this.rotations.x,
-        "y",
-        "z",
-      );
-      point["y"] = v1;
-      point["z"] = v2;
-      [v1, v2] = this.angleBetween(
-        point,
-        reference,
-        this.rotations.y,
-        "z",
-        "x",
-      );
-      point["z"] = v1;
-      point["x"] = v2;
+  getWorldPoints(rotated = this.faces) {
+    return rotated.map((face) => {
+      return face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre));
     });
   }
 
+  rotateOnAxis(vertex, axis1, axis2, angle = 0) {
+    const rad = toRadian(angle);
+    const c = Math.cos(rad);
+    const s = Math.sin(rad);
+    const dAxis1 = vertex[axis1] * c - vertex[axis2] * s;
+    const dAxis2 = vertex[axis2] * c + vertex[axis1] * s;
+    return [dAxis1, dAxis2];
+  }
+  increaseRotation(delta = { x: 1 }) {
+    this.rotation.add(delta);
+  }
+
+  rotateVertex(vertex, rotation) {
+    const radX = toRadian(rotation.x);
+    const radY = toRadian(rotation.y);
+    const radZ = toRadian(rotation.z);
+    // ===============rotate in X ============//
+    const cosX = Math.cos(radX);
+    const sinX = Math.sin(radX);
+    const y1 = cosX * vertex.y - sinX * vertex.z;
+    const z1 = sinX * vertex.y + cosX * vertex.z;
+
+    // ===============rotate in Y ============//
+    const cosY = Math.cos(radY);
+    const sinY = Math.sin(radY);
+    const x1 = cosY * vertex.x + sinY * z1;
+    const z2 = -sinY * vertex.x + cosY * z1;
+
+    // ===============rotate in Z ============//
+    const cosZ = Math.cos(radZ);
+    const sinZ = Math.sin(radZ);
+    const x2 = cosZ * x1 - sinZ * y1;
+    const y2 = sinZ * x1 + cosZ * y1;
+
+    return createVector(x2, y2, z2);
+  }
+
   rotateVertices() {
-    const points = this.vertices.map((p) => ({ ...p }));
-
-    this.rotateVerticesAtOneAxis(
-      points,
-      createVector(0, 0, 0),
-    );
-
-    return points.map((p) => {
-      const newX = p.x + this.centre.x;
-      const newY = p.y + this.centre.y;
-      const newZ = p.z + this.centre.z;
-      return { x: newX, y: newY, z: newZ };
+    return this.faces.map((face) => {
+      return face.map((vertex) => {
+        const rotatedVertex = this.rotateVertex(vertex, this.rotation);
+        return rotatedVertex;
+      });
     });
   }
 
   printableFaces() {
-    const newPoints = this.rotateVertices();
-    const faces = this.createFaces(newPoints);
-    return faces;
+    // this.increaseRotation({ x: 1, y: 1, z: 1 });
+    const rotated = this.rotateVertices();
+    return this.getWorldPoints(rotated);
   }
 }

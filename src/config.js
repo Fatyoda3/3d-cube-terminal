@@ -1,6 +1,6 @@
 export const canvas = {
-  width: 200,
-  height: 200,
+  width: 80,  
+  height: 60,
   pixels: [],
 };
 
@@ -9,4 +9,3 @@ export const createCanvas = (canvas) => {
     return Array.from({ length: canvas.width }, () => "  ");
   });
 };
-

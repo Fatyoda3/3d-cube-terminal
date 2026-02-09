@@ -1,55 +1,55 @@
-import { drawShapes, toRadian } from "./src/utilities.js";
+import { plotShapes } from "./src/utilities.js";
 import { canvas, createCanvas } from "./src/config.js";
 import { Cuboid } from "./src/shape.js";
+import { cls, draw } from "./src/cls.js";
+import { delay } from "./src/delay.js";
 
-const SHAPES = [];
-const [X, Y] = [0, 1];
+let inc = 0;
 
-const setup = () => {
-  console.clear();
-  createCanvas(canvas);
-  const offsets = [[-1, 1], [1, -1], [1, 1], [-1, -1], [0, 0]];
-  const params = [200, 100, 100, 100];
+const KEYS = { w: 119, a: 97, s: 115, d: 100, i: 105, j: 106, k: 107, l: 108 };
 
-  for (const offset of offsets) {
-    const cube = new Cuboid(200 * offset[X], 200 * offset[Y], ...params);
-    SHAPES.push(cube);
+Deno.stdin.setRaw(true, { cbreak: true });
+
+const handleKeystrokes = async (keystrokeBuff) => {
+  while (true) {
+    await Deno.stdin.read(keystrokeBuff);
+    const pressed = keystrokeBuff[0];
+
+    if (KEYS.w === pressed) inc += 1;
+    if (KEYS.s === pressed) inc -= 1; //w
+    if (pressed === 3) return true; // Ctrl+C
   }
 };
 
-const draw = () => {
-  drawShapes(SHAPES);
-};
+createCanvas(canvas);
 
-const delay = async (time) => {
-  await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(1);
-    }, time);
-  });
-};
+const cube = new Cuboid(0, 0, 200, 100, 100, 100);
+const shapes = [cube];
 
-const animateLoop = async () => {
-  const unitRadian = toRadian(1);
+const renderLoop = async () => {
+  const keystrokeBuff = new Uint8Array(1);
 
   while (true) {
-    createCanvas(canvas);
+    cls();
 
-    SHAPES.forEach((shape) =>
-      shape.changeRotation(unitRadian, unitRadian, unitRadian)
-    );
+    handleKeystrokes(keystrokeBuff);
+    console.log({ inc });
 
+    cube.increaseRotation({
+      x: inc,
+      y: inc,
+      z: inc,
+    });
+
+    console.log({ keystrokeBuff }, inc);
+
+    plotShapes(shapes);
     draw();
-
-    console.log(canvas.pixels.map((row) => row.join("")).join("\n"));
 
     await delay(100);
   }
 };
 
+await renderLoop();
 
-const main = () => {
-  setup();
-  animateLoop();
-};
-main();
+Deno.stdin.setRaw(false);
