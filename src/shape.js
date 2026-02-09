@@ -11,6 +11,7 @@ export class Cuboid {
     this.vertices = this.createVertices();
     this.faces = this.createFaces();
     this.rotation = createVector();
+    this.translation = createVector();
   }
 
   createVertices() {
@@ -41,10 +42,11 @@ export class Cuboid {
     return [f1, f2, f3, f4, f5, f6];
   }
 
-  getWorldPoints(rotated = this.faces) {
-    return rotated.map((face) => {
-      return face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre));
-    });
+  increaseRotation(delta = { x: 1 }) {
+    this.rotation.add(delta);
+  }
+  increaseTranslation(delta = { x: 1 }) {
+    this.translation.add(delta);
   }
 
   rotateOnAxis(vertex, axis1, axis2, angle = 0) {
@@ -54,9 +56,6 @@ export class Cuboid {
     const dAxis1 = vertex[axis1] * c - vertex[axis2] * s;
     const dAxis2 = vertex[axis2] * c + vertex[axis1] * s;
     return [dAxis1, dAxis2];
-  }
-  increaseRotation(delta = { x: 1 }) {
-    this.rotation.add(delta);
   }
 
   rotateVertex(vertex, rotation) {
@@ -93,9 +92,25 @@ export class Cuboid {
     });
   }
 
+  translatedPoints(faces = this.faces) {
+    return faces.map((face) => {
+      return face.map(({ x, y, z }) =>
+        createVector(x, y, z)
+          // .add(this.centre)
+          .add(this.translation)
+      );
+    });
+  }
+
+  getWorldPoints(rotated = this.faces) {
+    return rotated.map((face) => {
+      return face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre));
+    });
+  }
+
   printableFaces() {
-    // this.increaseRotation({ x: 1, y: 1, z: 1 });
     const rotated = this.rotateVertices();
-    return this.getWorldPoints(rotated);
+    const translated = this.translatedPoints(rotated);
+    return this.getWorldPoints(translated);
   }
 }

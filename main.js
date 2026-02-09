@@ -4,7 +4,8 @@ import { Cuboid } from "./src/shape.js";
 import { cls, draw } from "./src/cls.js";
 import { delay } from "./src/delay.js";
 
-let inc = 0;
+let incRotation = 0;
+let incTranslate = 0;
 
 const KEYS = { w: 119, a: 97, s: 115, d: 100, i: 105, j: 106, k: 107, l: 108 };
 
@@ -15,8 +16,10 @@ const handleKeystrokes = async (keystrokeBuff) => {
     await Deno.stdin.read(keystrokeBuff);
     const pressed = keystrokeBuff[0];
 
-    if (KEYS.w === pressed) inc += 1;
-    if (KEYS.s === pressed) inc -= 1; //w
+    if (KEYS.w === pressed) incRotation += 1;
+    if (KEYS.s === pressed) incRotation -= 1;
+    if (KEYS.d === pressed) incTranslate += 1;
+    if (KEYS.a === pressed) incTranslate -= 1;
     if (pressed === 3) return true; // Ctrl+C
   }
 };
@@ -33,15 +36,21 @@ const renderLoop = async () => {
     cls();
 
     handleKeystrokes(keystrokeBuff);
-    console.log({ inc });
+    console.log({ incRotation, incTranslate });
 
     cube.increaseRotation({
-      x: inc,
-      y: inc,
-      z: inc,
+      x: incRotation,
+      y: incRotation,
+      z: incRotation,
     });
 
-    console.log({ keystrokeBuff }, inc);
+    cube.increaseTranslation({
+      x: incTranslate,
+      y: incTranslate,
+      z: incTranslate,
+    });
+
+    console.log({ keystrokeBuff }, incRotation);
 
     plotShapes(shapes);
     draw();
