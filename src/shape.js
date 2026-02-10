@@ -79,8 +79,7 @@ export class Cuboid {
   rotateVertices() {
     return this.faces.map((face) => {
       return face.map((vertex) => {
-        const rotatedVertex = this.rotateVertex(vertex, this.rotation);
-        return rotatedVertex;
+        return this.rotateVertex(vertex, this.rotation);
       });
     });
   }
@@ -88,16 +87,17 @@ export class Cuboid {
   translatedPoints(faces = this.faces) {
     return faces.map((face) => {
       return face.map(({ x, y, z }) =>
-        createVector(x, y, z)
-          .add(this.translation)
+        createVector(x, y, z).add(this.translation)
       );
     });
   }
 
   getWorldPoints(rotated = this.faces) {
-    return rotated.map((face) =>
-      face.map(({ x, y, z }) => createVector(x, y, z).add(this.centre))
-    );
+    return rotated.map((face) => {
+      return face.map(({ x, y, z }) => {
+        return createVector(x, y, z).add(this.centre);
+      });
+    });
   }
 
   printableFaces() {

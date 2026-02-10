@@ -62,7 +62,7 @@ createCanvas(canvas);
 
 const cube = new Cuboid(-100, 0, 200, 75, 75, 75);
 const sphere = new Sphere(200, -300, -100, 600);
-const shapes = [sphere, cube];
+const shapes = [cube];
 
 const renderLoop = async () => {
   const keystrokeBuff = new Uint8Array(1);

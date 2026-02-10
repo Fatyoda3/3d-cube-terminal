@@ -34,6 +34,7 @@ const drawVertexLine = (vertices, index) => {
   p2.add(offsetCentre);
   drawLine(p1, p2, canvas);
 };
+
 const drawWireFrame = (vertices) => {
   for (let i = 0; i < vertices.length; ++i) {
     drawVertexLine(vertices, i);
@@ -70,7 +71,6 @@ export const drawLine = (p1, p2, canvas) => {
 
   for (let inc = 0; inc <= steps; inc++) {
     plotPoint(y, x, canvas, "✅");
-    // canvas.pixels[Math.round(y)][Math.round(x)] = "XX";
     x += stepsInX;
     y += stepsInY;
   }
